@@ -77,7 +77,7 @@ The cleaned dataset was uploaded to **Google BigQuery** to leverage:
 
 ## 5. Dashboards (Google Looker Studio)
 
-Business‑friendly dashboards were built on top of **BigQuery views** in **Google Looker Studio** to let non‑technical stakeholders explore:
+Business‑friendly dashboards were built in **Google Looker Studio** to let non‑technical stakeholders explore:
 
 - Overall **estimated revenue** by **genre**, **engagement (in the form of reviews)**, and **price tiers**.
 - Trends by **release year** and **publisher**.
@@ -100,4 +100,67 @@ Business‑friendly dashboards were built on top of **BigQuery views** in **Goog
 
 ---
 
+## 6. Modelling – XGBoost Revenue Predictor
 
+### 6.1 Problem Framing
+
+- **Task:** Regression – predict **log(revenue proxy)**, then transform back to the original scale.
+- **Unit of prediction:** One game.
+- **Inputs:**
+  - Price attributes: `final_price`, `discount_pct_clean`, `is_on_sale`.
+  - Platform flags: `win_support`, `mac_support`, `linux_support`, `multi_platform`.
+  - Content attributes: `has_dlc`, `dlc_available`, `is_early_access`, `is_free_to_play`.
+  - Encoded genres: one‑hot `genre_*` features.
+
+### 6.2 Model & Features
+
+Model trained in **Google Colab** using **XGBoost**:
+
+- **Algorithm:** `XGBRegressor`.
+- **Key hyperparameters:**
+  - `n_estimators`: **300**
+  - `max_depth`: **6**
+  - `learning_rate`: **0.01**
+  - `subsample`: **0.7**
+  - `colsample_bytree`: **0.9**
+
+> **Tuning approach:** Hyperparameters were selected using **GRID SEARCH HYPERPARAMETER TUNING**
+
+### 6.3 Performance
+
+- **R²:** 0.3135
+- **RMSE (₹):** ₹1001.9M
+- **MAE (₹):** ₹103.2M
+
+- Model performs best on **casual** games; struggles more with **RPG**
+
+## 7. Model Deployment – Flask API
+
+The trained XGBoost model is deployed via a **Flask API** (non‑notebook Python app) that can run in a terminal and be integrated into other services.
+
+## 8. Optimization & Latency Measurement
+
+A key part of this project is treating the model like a **real service**, not just a notebook experiment.
+
+### Latency Testing
+
+In `test_latency.py`, the API is called repeatedly for multiple game scenarios to measure:
+
+- **Mean latency**.
+- **P95 latency**.
+
+Results (to be filled):
+
+- **Average XGBoost latency:** 2065.469.
+- **P95 latency:** 2079.331.
+
+> <img width="472" height="413" alt="Screenshot 2025-12-19 145858" src="https://github.com/user-attachments/assets/088d2a4e-8945-4769-8d88-621b8635bf31" />
+
+## 9. How to Run This Project
+
+### 9.1 Clone & Install
+
+git clone https://github.com/cedricyu000925/steam-revenue-prediction-ml.git
+cd steam-revenue-prediction-ml
+
+pip install -r requirements.txt
