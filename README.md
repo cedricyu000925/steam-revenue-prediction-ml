@@ -167,8 +167,44 @@ cd steam-revenue-prediction-ml
 pip install -r requirements.txt
 
 
-### 11.2 Run the API
+### 9.2 Run the API
 
 cd api
 
 python app.py
+
+The API will start on: http://localhost:5000
+
+
+### 9.3 Test the API
+
+python test_api.py
+
+python test_latency.py
+
+---
+
+## 10. What This Project Demonstrates (For Recruiters / Hiring Managers)
+
+This project is designed as a **portfolio‑ready, real‑world style** piece to show:
+
+- ✅ **End‑to‑end thinking:** From raw data → insights → model → API → dashboard.
+- ✅ **Cloud awareness:** BigQuery as a warehouse for analytics and dashboarding.
+- ✅ **SQL & analytics:** Non‑trivial queries to answer concrete business questions.
+- ✅ **Machine Learning:** XGBoost regression, evaluation, and genre‑level performance analysis (also trained two different ML models for comparison).
+- ✅ **Explainability:** SHAP to explain predictions in business‑friendly terms.
+- ✅ **Deployment mindset:** Flask API, latency measurement, and model optimization attempts.
+- ✅ **Storytelling:** Clear narrative from business problem to technical solution and impact.
+
+---
+
+## 11. Contact
+
+If you’d like to discuss this project or the approach:
+
+- **Name:** Cedric Yu
+- **Location:** Hong Kong
+- **Email:** cedricyu80@gmail.com
+- **LinkedIn:** www.linkedin.com/in/shiu-kong-yu-971556105
+- **Portfolio/Website:** Coming soon!
+
