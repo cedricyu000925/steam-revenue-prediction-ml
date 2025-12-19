@@ -161,6 +161,14 @@ Results (to be filled):
 ### 9.1 Clone & Install
 
 git clone https://github.com/cedricyu000925/steam-revenue-prediction-ml.git
+
 cd steam-revenue-prediction-ml
 
 pip install -r requirements.txt
+
+
+### 11.2 Run the API
+
+cd api
+
+python app.py
