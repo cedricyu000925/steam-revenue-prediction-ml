@@ -1,0 +1,9 @@
+genre,full_price_games,discounted_games,fullprice_median_reviews,discounted_median_reviews,review_impact_pct,fullprice_revenue_proxy_k,discounted_revenue_proxy_k,revenue_impact_pct,avg_discount_applied_pct,discount_recommendation,confidence_level
+rpg,596,53,188.0,317.0,68.62,4104.0,27598.0,572.38,58.5,✅ POSITIVE: Discounts boost revenue,Moderate Confidence
+indie,3430,404,67.0,106.0,58.21,892.0,927.0,3.9,53.7,➡️ NEUTRAL: Minimal impact,High Confidence
+racing,238,28,229.0,698.0,204.8,3611.0,3522.0,-2.48,70.2,➡️ NEUTRAL: Minimal impact,Low Confidence (small sample)
+action,14874,1868,62.0,78.0,25.81,3421.0,2774.0,-18.89,61.3,❌ NEGATIVE: Discounts hurt revenue,High Confidence
+strategy,592,59,137.0,324.0,136.5,3084.0,2183.0,-29.2,62.9,❌ NEGATIVE: Discounts hurt revenue,Moderate Confidence
+adventure,7732,941,64.0,76.0,18.75,861.0,458.0,-46.85,55.1,❌ NEGATIVE: Discounts hurt revenue,High Confidence
+casual,5518,708,43.0,41.0,-4.65,325.0,67.0,-79.45,55.3,❌ NEGATIVE: Discounts hurt revenue,High Confidence
+simulation,897,89,125.0,78.0,-37.6,4131.0,454.0,-89.01,55.9,❌ NEGATIVE: Discounts hurt revenue,Moderate Confidence

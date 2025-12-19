@@ -1,0 +1,109 @@
+-- BUSINESS QUESTION 2: WILL DISCOUNTS AFFECT SALES/REVENUE?
+
+WITH discount_comparison AS (
+  -- Compare discounted vs full-price games
+  SELECT 
+    main_genre,
+    is_on_sale,
+    
+    -- Sample Sizes
+    COUNT(*) as game_count,
+    
+    -- Engagement Metrics (proxy for sales volume)
+    APPROX_QUANTILES(overall_review_count, 2)[OFFSET(1)] as median_reviews,
+    AVG(overall_review_count) as avg_reviews,
+    
+    -- Revenue Metrics
+    APPROX_QUANTILES(final_price, 2)[OFFSET(1)] as median_current_price,
+    AVG(discount_pct_clean) as avg_discount_pct,
+    
+    -- Revenue Proxy (engagement * price)
+    AVG(overall_review_count * final_price) as avg_revenue_proxy,
+    
+    -- Quality
+    AVG(overall_review_pct) as avg_quality_score
+
+  FROM `second-chariot-479412-g1.steam_analytics.games_clean`
+  WHERE main_genre IS NOT NULL
+    AND main_genre != ''
+    AND overall_review_count > 10  -- Filter out games with too few reviews
+  GROUP BY main_genre, is_on_sale
+),
+
+genre_discount_impact AS (
+  -- Calculate impact metrics by genre
+  SELECT 
+    main_genre,
+    
+    -- Discounted Games Metrics
+    MAX(CASE WHEN is_on_sale = TRUE THEN median_reviews END) as discounted_median_reviews,
+    MAX(CASE WHEN is_on_sale = TRUE THEN avg_reviews END) as discounted_avg_reviews,
+    MAX(CASE WHEN is_on_sale = TRUE THEN avg_revenue_proxy END) as discounted_revenue,
+    MAX(CASE WHEN is_on_sale = TRUE THEN game_count END) as discounted_game_count,
+    MAX(CASE WHEN is_on_sale = TRUE THEN avg_discount_pct END) as avg_discount_pct,
+    
+    -- Full Price Games Metrics
+    MAX(CASE WHEN is_on_sale = FALSE THEN median_reviews END) as fullprice_median_reviews,
+    MAX(CASE WHEN is_on_sale = FALSE THEN avg_reviews END) as fullprice_avg_reviews,
+    MAX(CASE WHEN is_on_sale = FALSE THEN avg_revenue_proxy END) as fullprice_revenue,
+    MAX(CASE WHEN is_on_sale = FALSE THEN game_count END) as fullprice_game_count
+    
+  FROM discount_comparison
+  GROUP BY main_genre
+)
+
+-- Final analysis with impact calculations
+SELECT 
+  main_genre as genre,
+  
+  -- Sample Sizes
+  fullprice_game_count as full_price_games,
+  discounted_game_count as discounted_games,
+  
+  -- Engagement Comparison
+  ROUND(fullprice_median_reviews, 0) as fullprice_median_reviews,
+  ROUND(discounted_median_reviews, 0) as discounted_median_reviews,
+  
+  -- Engagement Impact (%)
+  ROUND(
+    ((discounted_median_reviews - fullprice_median_reviews) / 
+     NULLIF(fullprice_median_reviews, 0)) * 100, 
+    2
+  ) as review_impact_pct,
+  
+  -- Revenue Proxy Comparison
+  ROUND(fullprice_revenue / 1000, 0) as fullprice_revenue_proxy_k,
+  ROUND(discounted_revenue / 1000, 0) as discounted_revenue_proxy_k,
+  
+  -- Revenue Impact (%)
+  ROUND(
+    ((discounted_revenue - fullprice_revenue) / 
+     NULLIF(fullprice_revenue, 0)) * 100, 
+    2
+  ) as revenue_impact_pct,
+  
+  -- Average Discount Applied
+  ROUND(avg_discount_pct, 1) as avg_discount_applied_pct,
+  
+  -- Business Interpretation
+  CASE 
+    WHEN ((discounted_revenue - fullprice_revenue) / NULLIF(fullprice_revenue, 0)) * 100 > 10 
+      THEN '✅ POSITIVE: Discounts boost revenue'
+    WHEN ((discounted_revenue - fullprice_revenue) / NULLIF(fullprice_revenue, 0)) * 100 BETWEEN -10 AND 10 
+      THEN '➡️ NEUTRAL: Minimal impact'
+    ELSE '❌ NEGATIVE: Discounts hurt revenue'
+  END as discount_recommendation,
+  
+  -- Confidence Level
+  CASE 
+    WHEN discounted_game_count >= 100 AND fullprice_game_count >= 100 
+      THEN 'High Confidence'
+    WHEN discounted_game_count >= 30 AND fullprice_game_count >= 30 
+      THEN 'Moderate Confidence'
+    ELSE 'Low Confidence (small sample)'
+  END as confidence_level
+
+FROM genre_discount_impact
+WHERE discounted_game_count > 10  -- Ensure meaningful sample size
+  AND fullprice_game_count > 10
+ORDER BY revenue_impact_pct DESC;

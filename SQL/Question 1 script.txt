@@ -1,0 +1,88 @@
+-- BUSINESS QUESTION 1: WHAT GENRES WILL GENERATE THE MOST REVENUE?
+
+WITH genre_revenue_metrics AS (
+  -- Calculate estimated revenue proxy and engagement metrics per genre
+  SELECT 
+    main_genre,
+    
+    -- Market Size Metrics
+    COUNT(*) as total_games,
+    COUNT(CASE WHEN has_dlc = TRUE THEN 1 END) as games_with_dlc,
+    
+    -- Engagement Metrics (proxy for revenue potential)
+    APPROX_QUANTILES(overall_review_count, 2)[OFFSET(1)] as median_reviews,
+    AVG(overall_review_count) as avg_reviews,
+    SUM(overall_review_count) as total_reviews,
+    
+    -- Quality Metrics
+    APPROX_QUANTILES(overall_review_pct, 2)[OFFSET(1)] as median_quality_score,
+    
+    -- Pricing Metrics
+    APPROX_QUANTILES(final_price, 2)[OFFSET(1)] as median_price,
+    AVG(final_price) as avg_price,
+    
+    -- Revenue Proxy (reviews * price = engagement value)
+    AVG(overall_review_count * final_price) as avg_engagement_value,
+    SUM(overall_review_count * final_price) as total_engagement_value,
+    
+    -- DLC Monetization Potential
+    ROUND(COUNT(CASE WHEN has_dlc = TRUE THEN 1 END) * 100.0 / COUNT(*), 2) as pct_with_dlc,
+    AVG(CASE WHEN has_dlc = TRUE THEN dlc_available END) as avg_dlc_count,
+    
+    -- Platform Reach
+    ROUND(COUNT(CASE WHEN multi_platform = TRUE THEN 1 END) * 100.0 / COUNT(*), 2) as pct_multiplatform
+
+  FROM `second-chariot-479412-g1.steam_analytics.games_clean`
+  WHERE main_genre IS NOT NULL
+    AND main_genre != ''
+  GROUP BY main_genre
+),
+
+genre_rankings AS (
+  -- Rank genres by different revenue indicators
+  SELECT 
+    *,
+    ROW_NUMBER() OVER (ORDER BY total_engagement_value DESC) as revenue_rank,
+    ROW_NUMBER() OVER (ORDER BY median_reviews DESC) as engagement_rank,
+    ROW_NUMBER() OVER (ORDER BY median_price DESC) as price_rank,
+    ROW_NUMBER() OVER (ORDER BY total_games DESC) as market_size_rank
+  FROM genre_revenue_metrics
+)
+
+-- Final output with comprehensive metrics
+SELECT 
+  main_genre as genre,
+  
+  -- Revenue Indicators
+  ROUND(total_engagement_value / 1000000, 2) as est_revenue_millions,
+  ROUND(avg_engagement_value / 1000, 2) as avg_revenue_per_game_thousands,
+  
+  -- Market Metrics
+  total_games,
+  ROUND(median_reviews, 0) as median_reviews,
+  ROUND(avg_reviews, 0) as avg_reviews,
+  
+  -- Quality & Pricing
+  ROUND(median_quality_score, 1) as quality_score_pct,
+  ROUND(median_price, 0) as median_price_inr,
+  
+  -- Monetization Strategy
+  pct_with_dlc as dlc_adoption_pct,
+  ROUND(avg_dlc_count, 1) as avg_dlc_per_game,
+  pct_multiplatform as multiplatform_pct,
+  
+  -- Rankings
+  revenue_rank,
+  engagement_rank,
+  
+  -- Business Insight Label
+  CASE 
+    WHEN revenue_rank <= 3 THEN '🏆 High Revenue Potential'
+    WHEN revenue_rank <= 6 THEN '💰 Good Revenue Potential'
+    WHEN revenue_rank <= 9 THEN '💵 Moderate Revenue'
+    ELSE '💸 Lower Revenue'
+  END as revenue_category
+
+FROM genre_rankings
+ORDER BY total_engagement_value DESC
+LIMIT 15;
