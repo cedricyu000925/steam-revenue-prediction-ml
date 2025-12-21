@@ -184,7 +184,7 @@ python test_latency.py
 
 ---
 
-## 10. What This Project Demonstrates (For Recruiters / Hiring Managers)
+## 10. What This Project Demonstrates
 
 This project is designed as a **portfolio‑ready, real‑world style** piece to show:
 
