@@ -149,12 +149,12 @@ In `test_latency.py`, the API is called repeatedly for multiple game scenarios t
 - **Mean latency**.
 - **P95 latency**.
 
-Results (to be filled):
+Results (per game):
 
-- **Average XGBoost latency:** 2065.469.
-- **P95 latency:** 2079.331.
+- **Average XGBoost latency:** 2.862.
+- **P95 latency:** 6.978.
 
-> <img width="472" height="413" alt="Screenshot 2025-12-19 145858" src="https://github.com/user-attachments/assets/088d2a4e-8945-4769-8d88-621b8635bf31" />
+> <img width="511" height="196" alt="Screenshot 2025-12-23 194830" src="https://github.com/user-attachments/assets/59d6da2b-8aa0-469a-88b4-0a768348bbc1" />
 
 ## 9. How to Run This Project
 
