@@ -206,5 +206,5 @@ If you’d like to discuss this project or the approach:
 - **Location:** Hong Kong
 - **Email:** cedricyu80@gmail.com
 - **LinkedIn:** www.linkedin.com/in/shiu-kong-yu-971556105
-- **Portfolio/Website:** Coming soon!
+- **Portfolio/Website:** https://yu-shiu-kong.gitbook.io/data-projects/
 
